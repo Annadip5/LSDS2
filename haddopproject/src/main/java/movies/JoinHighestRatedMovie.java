@@ -16,23 +16,52 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class JoinHighestRatedMovie {
 
     public static class MoviesMapper extends Mapper<Object, Text, IntWritable, Text> {
+
+        private static final Pattern CSV_PATTERN = Pattern.compile("^([0-9]+),\"?(.*?)\"?,(.*)$");
+
+        @Override
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            String[] fields = value.toString().split(",");
-            if (fields.length > 1 && !fields[0].equals("movieId")) {
-                int movieId = Integer.parseInt(fields[0]);
+            String line = value.toString().trim(); // Suppression des espaces inutiles
 
-                StringBuilder movieName = new StringBuilder(fields[1]);
-                for (int i = 2; i < fields.length; i++) {
-                    movieName.append(",").append(fields[i]);
+            if (line.contains("\"") && (line.split("\"").length % 2 != 0)) {
+                System.err.println("Ligne ignorée (guillemets non appariés) : " + line);
+                return;
+            }
+
+            Matcher matcher = CSV_PATTERN.matcher(line);
+            if (matcher.matches()) {
+                try {
+                    int movieId = Integer.parseInt(matcher.group(1));
+                    String movieTitle = matcher.group(2).trim();
+                    String genres = matcher.group(3).trim();
+
+                    // Vérification que toutes les parties sont présentes
+                    if (!movieTitle.isEmpty() && !genres.isEmpty()) {
+                        // Écrire dans le contexte avec le format attendu
+                        context.write(new IntWritable(movieId), new Text("M:" + movieTitle));
+                    } else {
+                        // Log si certaines parties sont manquantes
+                        System.err.println("Ligne ignorée (champs manquants) : " + line);
+                    }
+                } catch (NumberFormatException e) {
+                    // Log si le movieId n'est pas un entier valide
+                    System.err.println("Erreur de parsing du movieId dans la ligne : " + line);
                 }
-
-                context.write(new IntWritable(movieId), new Text("M:" + movieName));
+            } else {
+                // Log en cas de ligne malformée
+                System.err.println("Ligne ignorée (malformée) : " + line);
             }
         }
     }
+
+
+
 
 
     public static class RatingsMapper extends Mapper<Object, Text, IntWritable, Text> {

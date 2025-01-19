@@ -31,7 +31,7 @@ Dans un terminal, se placer dans le contenaire resourcemanager :
 docker exec -it resourcemanager bash
 ls /hadoop/moviesProject/
 ```
-Dévloppé dans la section Project (lancer un jar pour un script) : 
+Commandes exactes écrites dans la section Project (lancer un jar pour un script) : 
 ```bash
 hadoop jar hadoop/moviesProject/haddopproject-1.0-SNAPSHOT.jar <class_name> <input_path> <output_path>
 ```
@@ -108,8 +108,9 @@ Pemet de regrouper les films par nombre de like
 hadoop jar /hadoop/moviesProject/haddopproject-1.0-SNAPSHOT.jar likeCount /output/highestMovieNamePerUser /output/groupResults
 
 hdfs dfs -cat /output/groupResults/part-r-00000
+hdfs dfs -cat /output/intermediate_output/part-r-00000
 
-hdfs dfs -rm -r /user/root/intermediate_output
+hdfs dfs -rm -r /output/intermediate_output/
 hdfs dfs -rm -r /output/groupResults
 ```
 
@@ -126,7 +127,7 @@ Second job
 
 **RESULT : Group by number of likes**
 
-<img src="images/3Res.png" width="600"/>
+<img src="images/3Res.png" width="1000"/>
 
 **intermediate result**
 
