@@ -1,5 +1,5 @@
-# LSDS
-
+# LSDS University Project
+**DI PLACIDO Anna M2 Informatique SSE**
 ## Preparation
 
 build docker compose file
