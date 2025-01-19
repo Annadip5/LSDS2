@@ -27,7 +27,7 @@ public class JoinHighestRatedMovie {
 
         @Override
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            String line = value.toString().trim(); // Suppression des espaces inutiles
+            String line = value.toString().trim(); 
 
             if (line.contains("\"") && (line.split("\"").length % 2 != 0)) {
                 System.err.println("Ligne ignorée (guillemets non appariés) : " + line);
@@ -41,20 +41,15 @@ public class JoinHighestRatedMovie {
                     String movieTitle = matcher.group(2).trim();
                     String genres = matcher.group(3).trim();
 
-                    // Vérification que toutes les parties sont présentes
                     if (!movieTitle.isEmpty() && !genres.isEmpty()) {
-                        // Écrire dans le contexte avec le format attendu
                         context.write(new IntWritable(movieId), new Text("M:" + movieTitle));
                     } else {
-                        // Log si certaines parties sont manquantes
                         System.err.println("Ligne ignorée (champs manquants) : " + line);
                     }
                 } catch (NumberFormatException e) {
-                    // Log si le movieId n'est pas un entier valide
                     System.err.println("Erreur de parsing du movieId dans la ligne : " + line);
                 }
             } else {
-                // Log en cas de ligne malformée
                 System.err.println("Ligne ignorée (malformée) : " + line);
             }
         }
